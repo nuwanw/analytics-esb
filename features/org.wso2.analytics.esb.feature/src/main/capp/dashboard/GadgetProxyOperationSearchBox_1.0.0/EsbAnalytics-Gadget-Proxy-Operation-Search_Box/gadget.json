@@ -1,0 +1,20 @@
+{
+  "id": "EsbAnalytics-Gadget-Proxy-Operation-Search_Box",
+  "title": "Proxy Operation Search Box",
+  "type": "widget",
+  "category": "Widgets",
+  "thumbnail": "store://gadget/usa-business-revenue/index.png",
+  "data": {
+    "url": "store://gadget/EsbAnalytics-Gadget-Proxy-Operation-Search_Box/index.xml"
+  },
+  "styles": {
+    "borders": false,
+    "title": false
+  },
+  "toolbarButtons":{
+    "default":{
+        "maximize": false,
+        "configurations": false
+    }
+  }
+}

@@ -1,5 +1,6 @@
 var configs = [
     { name: TYPE_PROXY, type: 6, placeholder: 'Proxy Service' },
+    { name: TYPE_PROXY_OPERATION, type: 6, placeholder: 'Proxy Service' },
     { name: TYPE_API, type: 11, placeholder: 'API' },
     { name: TYPE_MEDIATOR, type: 16, placeholder: 'Mediator' },
     { name: TYPE_ENDPOINT, type: 24, placeholder: 'Endpoint' },

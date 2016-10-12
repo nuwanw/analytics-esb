@@ -6,13 +6,15 @@ var type = 38;
 $(function() {
 
     if (page && qs[PARAM_ID] == null) {
-        
         switch(page.name) {
             case 'api':
                 $("#canvas").html(gadgetUtil.getInfoText('Please select an API and a valid date range to view stats.'));
                 break;
             case 'proxy':
                 $("#canvas").html(gadgetUtil.getInfoText('Please select a Proxy Service and a valid date range to view stats.'));
+                break;
+            case 'proxy-operation':
+                $("#canvas").html(gadgetUtil.getInfoText('Please select a Proxy Service, operation and a valid date range to view stats.'));
                 break;
             case 'sequences':
                 $("#canvas").html(gadgetUtil.getInfoText('Please select a Sequence and a valid date range to view stats.'));
@@ -45,6 +47,8 @@ $(function() {
     gadgetUtil.fetchData(CONTEXT, {
         type: type,
         id: qs.id,
+        operation: qs.operation,
+        consumer: qs.consumer,
         entryPoint: qs.entryPoint,
         timeFrom: timeFrom,
         timeTo: timeTo
@@ -61,6 +65,8 @@ function onTimeRangeChanged(data) {
     gadgetUtil.fetchData(CONTEXT, {
         type: type,
         id: qs.id,
+        operation: qs.operation,
+        consumer: qs.consumer,
         timeFrom: data.timeFrom,
         timeTo: data.timeTo,
         entryPoint: qs.entryPoint

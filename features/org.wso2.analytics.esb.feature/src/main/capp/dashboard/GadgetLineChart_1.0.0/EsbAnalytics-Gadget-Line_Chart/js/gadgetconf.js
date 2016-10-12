@@ -55,6 +55,7 @@ var charts = [{
     types: [
         { name: TYPE_LANDING, type: 2 },
         { name: TYPE_PROXY, type: 7 },
+        { name: TYPE_PROXY_OPERATION, type: 53 },
         { name: TYPE_API, type: 12 },
         { name: TYPE_MEDIATOR, type: 17 },
         { name: TYPE_ENDPOINT, type: 25 },
@@ -91,6 +92,7 @@ var charts = [{
     },
     types: [
         { name: TYPE_PROXY, type: 8 },
+        { name: TYPE_PROXY_OPERATION, type: 52 },
         { name: TYPE_API, type: 13 },
         { name: TYPE_MEDIATOR, type: 18 },
         { name: TYPE_ENDPOINT, type: 26 },

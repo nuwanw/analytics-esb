@@ -8,14 +8,14 @@ $(function() {
     var page = gadgetUtil.getCurrentPage();
     var qs = gadgetUtil.getQueryString();
     
-    $("#txtSearch").attr('placeholder', 'Search ' + page.placeholder + ' ...');
+    $("#txtSearchOperation").attr('placeholder', 'Search Operation' + ' ...');
 
-    if(qs[PARAM_ID] != null) {
-        $("#txtSearch").val(qs[PARAM_ID]);
-    }
+   if(qs[PARAM_OPERATION] != null) {
+       $("#txtSearchOperation").val(qs[PARAM_OPERATION]);
+   }
 
     gadgetUtil.fetchData(CONTEXT, {
-        type: page.type,
+        type: page.type, id:qs[PARAM_ID]
     }, onData, onError); 
 
     function onData(response) {
@@ -28,21 +28,13 @@ $(function() {
             source: substringMatcher(response.message)
         }).on('typeahead:selected', function(evt, item) {
             var href = parent.window.location.href;
-            //clear the operation text on proxy search box changed
             if(qs[PARAM_OPERATION]) {
-               href = href.replace(/(&operation=)[^\&]+/, "");
-            }
-            //clear the consumer text on proxy search box changed
-            if(qs[PARAM_CONSUMER]) {
-               href = href.replace(/(&consumer=)[^\&]+/, "");
-            }
-            if(qs[PARAM_ID]) {
-                href = href.replace(/(id=)[^\&]+/, '$1' + item);
+                href = href.replace(/(operation=)[^\&]+/, '$1' + item);
             } else {
                 if (href.includes("?")) {
-                    href = href + "&" + PARAM_ID + "=" + item;
+                    href = href + "&" + PARAM_OPERATION + "=" + item;
                 } else {
-                    href = href + "?" + PARAM_ID + "=" + item;
+                    href = href + "?" + PARAM_OPERATION + "=" + item;
                 }
             }
             parent.window.location = href;

@@ -70,8 +70,12 @@
     var TYPE_TOP_INVOKED_INBOUNDS = 46;
     var TYPE_TOP_INVOKED_SEQUENCES = 47;
     var TYPE_MESSAGE_COMPARISON = 48;
-
-
+    var TYPE_PROXY_OPERATION_NAMES = 49;
+    var TYPE_PROXY_OPERATION_STATS = 50;
+    var TYPE_SERVICE_CONSUMER_NAMES = 51;
+    var TYPE_PROXY_OPERATION_LATENCY = 52; 
+    var TYPE_PROXY_OPERATION_MESSAGE_RATE = 53;   
+ 
     if (configs.cacheTimeoutSeconds) {
         cacheTimeoutSeconds = parseInt(configs.cacheTimeoutSeconds);
     }
@@ -245,6 +249,18 @@
                 var result = esbanalyticsUtils.getComponentNames(connector, superTenantId, "Proxy Service", tenantId);
                 break;
             }
+            case TYPE_PROXY_OPERATION_NAMES:
+            {
+               var proxyName = request.getParameter("id");            
+               var result = esbanalyticsUtils.getServiceOperationNames(connector, superTenantId, "Proxy Service", proxyName , tenantId);
+                break;
+            }
+            case TYPE_SERVICE_CONSUMER_NAMES:
+            {
+               var proxyName = request.getParameter("id");
+               var result = esbanalyticsUtils.getServiceConsumerNames(connector, superTenantId, "Proxy Service", proxyName , tenantId);
+               break;
+            }
             case TYPE_PROXY_MESSAGE_RATE:
             {
                 var componentName = request.getParameter("id");
@@ -254,6 +270,17 @@
                 result = esbanalyticsUtils.getMessageRate(connector, superTenantId, timeFrom, timeTo, tableName, componentName, null, tenantId);
                 break;
             }
+            case TYPE_PROXY_OPERATION_MESSAGE_RATE:
+            {
+                var componentName = request.getParameter("id");
+                var proxyOperation = request.getParameter("operation");
+                var consumer = request.getParameter("consumer");
+                var timeUnit = timeRangeUtil.getSuitableTimeRangeUnit(timeFrom, timeTo);
+                var tableName = "org_wso2_esb_analytics_proxy_operation_stream_StatPer" + timeUnit;
+                timeFrom = timeRangeUtil.roundFloor(timeFrom, timeUnit);
+                result = esbanalyticsUtils.getMessageRateBy(connector, superTenantId, timeFrom, timeTo, tableName, componentName, proxyOperation, consumer, tenantId);
+                break;
+            }
             case TYPE_PROXY_LATENCY:
             {
                 var timeUnit = timeRangeUtil.getSuitableTimeRangeUnit(timeFrom, timeTo);
@@ -261,6 +288,17 @@
                 timeFrom = timeRangeUtil.roundFloor(timeFrom, timeUnit);
                 var componentName = request.getParameter("id");
                 result = esbanalyticsUtils.getLatency(connector, superTenantId, timeFrom, timeTo, tableName, componentName, null, tenantId);
+                break;
+            }
+            case TYPE_PROXY_OPERATION_LATENCY:
+            {
+                var timeUnit = timeRangeUtil.getSuitableTimeRangeUnit(timeFrom, timeTo);
+                var tableName = "org_wso2_esb_analytics_proxy_operation_stream_StatPer" + timeUnit;
+                timeFrom = timeRangeUtil.roundFloor(timeFrom, timeUnit);
+                var componentName = request.getParameter("id");
+                var operationName = request.getParameter("operation");
+                var consumer = request.getParameter("consumer");
+                result = esbanalyticsUtils.getMsgLatency(connector, superTenantId, timeFrom, timeTo, tableName, componentName, operationName, consumer, tenantId);
                 break;
             }
             case TYPE_PROXY_MESSAGE_FLOW:
@@ -981,6 +1019,17 @@
                 var timeRanges = timeRangeUtil.getDateTimeRanges(timeFrom, timeTo);
                 var table = "org_wso2_esb_analytics_stream_StatPer";
                 var result = esbanalyticsUtils.getStats(connector, superTenantId, "Proxy", componentName, null, timeRanges, table, tenantId);
+                break;
+            }
+            
+            case TYPE_PROXY_OPERATION_STATS:
+            {
+                var componentName = request.getParameter("id");
+                var operationName = request.getParameter("operation");
+                var consumer = request.getParameter("consumer");
+                var timeRanges = timeRangeUtil.getDateTimeRanges(timeFrom, timeTo);
+                var table = "org_wso2_esb_analytics_proxy_operation_stream_StatPer";
+                var result = esbanalyticsUtils.getProxyOperationStats(connector, superTenantId, "Proxy", componentName, operationName, consumer, timeRanges, table, tenantId);
                 break;
             }
             case TYPE_API_STATS:

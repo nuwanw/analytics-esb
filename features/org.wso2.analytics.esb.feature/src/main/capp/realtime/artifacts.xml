@@ -19,14 +19,18 @@
         <dependency artifact="MediatorStatPerSecondStream" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
         <dependency artifact="MediatorStatPerSecondEventSink" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
         <dependency artifact="MediatorStatPerMinuteStream" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
+        <dependency artifact="ProxyOperationStatPerMinuteStream" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
         <dependency artifact="MediatorStatPerMinuteEventSink" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
         <dependency artifact="ESBStatStream" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
         <dependency artifact="ESBStatEventSink" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
+        <dependency artifact="ProxyOperationStatPerMinuteEventSink" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
         <dependency artifact="ESBAnalyticsExecutionPlan" version="1.0.0" include="true" serverRole="ComplexEventProcessor"/>
         <!-- Gadgets -->
         <dependency artifact="GadgetCommons" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
         <dependency artifact="GadgetDateRangePicker" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
         <dependency artifact="GadgetSearchBox" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
+        <dependency artifact="GadgetProxyOperationSearchBox" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
+        <dependency artifact="GadgetConsumerSearchBox" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
         <dependency artifact="GadgetLineChart" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
         <dependency artifact="GadgetHorizontalBarChart" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>
         <dependency artifact="GadgetStatsChart" version="1.0.0" include="true" serverRole="DataAnalyticsServer"/>

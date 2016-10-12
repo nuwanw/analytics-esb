@@ -25,6 +25,9 @@ define stream mediatorStatPerSec (meta_tenantId int, year int, month int, day in
 @Export('org.wso2.esb.analytics.stream.MediatorStatPerMinute:1.0.0')
 define stream mediatorStatPerMin (meta_tenantId int, year int, month int, day int, hour int, minute int, entryPoint string, entryPointHashcode string, componentId string, hashCode string, componentName string, componentType string, totalDuration long, minDuration long, maxDuration long, noOfInvocation long, faultCount long, startTime long, facetStartTime string, _timestamp long);
 
+@Export('org.wso2.esb.analytics.proxy.operation.stream.StatPerMinute:1.0.0')
+define stream proxyOperationPerMinute (meta_tenantId int, year int, month int, day int, hour int, minute int, componentId string, componentName string, operation string, componentType string, totalDuration long, minDuration long, maxDuration long, noOfInvocation long, faultCount long, startTime long, facetStartTime string, consumer string, _timestamp long);
+
 from flowEntry#esbAnalytics:decompress(meta_compressed, meta_tenantId, flowData, messageId)
 select messageFlowId, host, hashCode, componentName, componentType, componentIndex, componentId,  startTime, endTime, duration, beforePayload, afterPayload, contextPropertyMap, transportPropertyMap, children, entryPoint, entryPointHashcode, faultCount,metaTenantId, _timestamp
 insert into decompressedEventStreamTemp;
@@ -60,6 +63,19 @@ select meta_tenantId, time:extract(startTime, 'year') as year, time:extract(star
 insert into perSecondAll;
 
 -- min
+from decompressedHighLevelEventStream[componentType == 'Proxy Service' AND not(transportPropertyMap is null)]
+select meta_tenantId, startTime, componentId, componentName, (regex:group("(SOAPAction=)(.*?)(,)", transportPropertyMap , 2)) as operation, componentType, duration, faultCount, (regex:group("(User-Agent=)(.*?)(,)", transportPropertyMap , 2)) as host, _timestamp
+insert into proxyOperationEntryPerMinuteTemp;
+
+from proxyOperationEntryPerMinuteTemp#window.externalTimeBatch(startTime, 60 sec, 59999 millisec, 120 sec, true)
+select meta_tenantId, startTime, componentId, componentName, operation, componentType, sum(duration) as totalDuration, min(duration) as minDuration, max(duration) as maxDuration, count(*) as noOfInvocation, sum(ifThenElse(faultCount > 0, 1, 0)) as faultCount, host, _timestamp
+group by meta_tenantId, componentId, componentName, operation, componentType, host
+insert into proxyOperationPerMinuteTemp;
+
+from proxyOperationPerMinuteTemp
+select meta_tenantId, time:extract(startTime, 'year') as year, time:extract(startTime, 'month') as month, time:extract(startTime, 'day') as day, time:extract(startTime, 'hour') as hour, time:extract(startTime, 'minute') as minute, componentId, componentName, operation, componentType, totalDuration, minDuration, maxDuration, noOfInvocation, faultCount, esbAnalytics:getMinuteStartingTime(startTime) as startTime, convert(esbAnalytics:getMinuteStartingTime(startTime), 'string') as facetStartTime, host as consumer, _timestamp
+insert into proxyOperationPerMinute;
+
 from perSecond
 select meta_tenantId, str:concat(meta_tenantId, '_', facetStartTime, '_', componentId, '_', componentName, '_', componentType, '_', entryPoint) as uniqueId, year, month, day, hour, minute, second, componentId, componentName, componentType, totalDuration, minDuration, maxDuration, noOfInvocation, faultCount, startTime, facetStartTime, entryPoint, _timestamp
 insert into perSecondWithUniqueId;

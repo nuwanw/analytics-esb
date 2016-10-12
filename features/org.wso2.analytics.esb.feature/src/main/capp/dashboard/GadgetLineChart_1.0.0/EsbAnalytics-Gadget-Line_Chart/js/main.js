@@ -46,6 +46,8 @@ $(function() {
     gadgetUtil.fetchData(CONTEXT, {
         type: type,
         id: qs.id,
+        operation: qs.operation,
+        consumer: qs.consumer,
         timeFrom: timeFrom,
         timeTo: timeTo,
         entryPoint: qs.entryPoint
@@ -62,6 +64,8 @@ function onTimeRangeChanged(data) {
     gadgetUtil.fetchData(CONTEXT, {
         type: type,
         id: qs.id,
+        operation: qs.operation,
+        consumer: qs.consumer,
         timeFrom: data.timeFrom,
         timeTo: data.timeTo,
         entryPoint: qs.entryPoint

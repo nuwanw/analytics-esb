@@ -24,6 +24,7 @@ var BASE_URL = getDashboardBaseUrl();
 
 var TYPE_LANDING = "landing";
 var TYPE_PROXY = "proxy";
+var TYPE_PROXY_OPERATION = "proxy-operation";
 var TYPE_API = "api";
 var TYPE_SEQUENCE = "sequences";
 var TYPE_ENDPOINT = "endpoint";
@@ -38,6 +39,8 @@ var ROLE_RATE = "rate";
 var PARAM_ID = "id";
 var PARAM_TYPE = "type";
 var PARAM_GADGET_ROLE = "role";
+var PARAM_OPERATION = "operation";
+var PARAM_CONSUMER = "consumer";
 
 var PROXY_PAGE_URL = BASE_URL + TYPE_PROXY;
 var API_PAGE_URL = BASE_URL + TYPE_API;

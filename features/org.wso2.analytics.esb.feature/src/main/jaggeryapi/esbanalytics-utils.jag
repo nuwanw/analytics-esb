@@ -61,6 +61,52 @@ function getComponentNames(connector, superTenantId, componentType, tenantId) {
     return result;
 };
 
+/*
+* Get the list of service operation names of a given type(Proxy)
+*/
+function getServiceOperationNames(connector, superTenantId, componentType, proxyName, tenantId) {
+    result = [];
+        var tableName = "org_wso2_esb_analytics_proxy_operation_stream_StatPerMinute";
+    query = stringify({
+                          "fieldName": "operation",
+                          "query": "_componentType : \"" + componentType + "\" AND componentName : \"" + proxyName + "\"  AND meta_tenantId : [" + tenantId + " TO " + tenantId + "]"
+                      });
+    resp = connector.drillDownCategories(superTenantId, tableName, query);
+    if (resp.status == "success") {
+        var proxyNames = JSON.parse(resp.getMessage());
+        for (var name in proxyNames["categories"]) {
+            result.push(name);
+        }
+    } else {
+        var log = new Log();
+        log.error(resp.getMessage());
+    }
+    return result;
+};
+
+
+/*
+* Get the list of service consumer names of a given type(Proxy)
+*/
+function getServiceConsumerNames(connector, superTenantId, componentType, proxyName, tenantId) {
+    result = [];
+        var tableName = "org_wso2_esb_analytics_proxy_operation_stream_StatPerMinute";
+    query = stringify({
+                          "fieldName": "consumer",
+                          "query": "_componentType : \"" + componentType + "\" AND componentName : \"" + proxyName + "\"  AND meta_tenantId : [" + tenantId + " TO " + tenantId + "]"
+                      });
+    resp = connector.drillDownCategories(superTenantId, tableName, query);
+    if (resp.status == "success") {
+        var proxyNames = JSON.parse(resp.getMessage());
+        for (var name in proxyNames["categories"]) {
+            result.push(name);
+        }
+    } else {
+        var log = new Log();
+        log.error(resp.getMessage());
+    }
+    return result;
+};
 
 /*
 * Get the latency (time taken to invoke) of a component
@@ -74,6 +120,49 @@ function getLatency(connector, superTenantId, timeFrom, timeTo, tableName, compo
         query = "entryPoint : " + entryPoint + " AND _componentName : \"" + componentName + "\" AND startTime : [" + timeFrom + " TO " + timeTo + "} AND meta_tenantId : [" + tenantId + " TO " + tenantId + "]";
     }
     query = stringify({
+                          tableName: tableName,
+                          query: query,
+                          start: 0,
+                          count: 60
+                      });
+    resp = connector.search(superTenantId, tableName, query);
+    if (resp.status == "success") {
+        var dataPoints = JSON.parse(resp.getMessage());
+        for (var i = 0; i < dataPoints.length; i++) {
+            var obj = dataPoints[i];
+            if (obj != null) {
+                result.push({
+                            "timestamp": obj.values.facetStartTime,
+                            "min": obj.values.minDuration,
+                            "max": obj.values.maxDuration,
+                            "avg": obj.values.totalDuration / obj.values.noOfInvocation
+                            });
+            }
+        }
+    } else {
+        var log = new Log();
+        log.error(resp.getMessage());
+    }
+    return result;
+};
+
+/*
+* Get the latency (time taken to invoke) of a component
+*/
+function getMsgLatency(connector, superTenantId, timeFrom, timeTo, tableName, componentName, proxyOperation, consumer, tenantId) {
+    var result = [];
+    var query;
+    query = "_componentName : \"" + componentName + "\" AND startTime : [" + timeFrom + " TO " + timeTo + "} AND meta_tenantId : [" + tenantId + " TO " + tenantId + "]";
+    
+    if (proxyOperation != null && proxyOperation != "undefined") {
+                 query = "operation " + ":\"" + proxyOperation + "\" AND " +  query ;
+      }
+
+   if (consumer != null && consumer != "undefined") {
+                 query = "consumer " + ":\"" + consumer + "\" AND " +  query ;
+      }
+   
+   query = stringify({
                           tableName: tableName,
                           query: query,
                           start: 0,
@@ -139,6 +228,48 @@ function getMessageRate(connector, superTenantId, timeFrom, timeTo, tableName, c
     return result;
 };
 
+/*
+* Get the message rate (count of messages) of a component
+*/
+function getMessageRateBy(connector, superTenantId, timeFrom, timeTo, tableName, componentName, proxyOperation, consumer,  tenantId) {
+    var result = [];
+    var query;
+    query = "_componentName : \"" + componentName + "\" AND startTime : [" + timeFrom + " TO " + timeTo + "} AND meta_tenantId : [" + tenantId + " TO " + tenantId + "]";
+    
+    if (proxyOperation != null && proxyOperation != "undefined") {
+                 query = "operation " + ":\"" + proxyOperation + "\" AND " +  query ;
+      }
+
+   if (consumer != null && consumer != "undefined") {
+                 query = "consumer " + ":\"" + consumer + "\" AND " +  query ;
+      }
+   query = stringify({
+                          tableName: tableName,
+                          query: query,
+                          start: 0,
+                          count: 60
+                      });
+
+    resp = connector.search(superTenantId, tableName, query);
+    if (resp.status == "success") {
+        var dataPoints = JSON.parse(resp.getMessage());
+        for (var i = 0; i < dataPoints.length; i++) {
+            var obj = dataPoints[i];
+            if (obj != null) {
+                result.push({
+                            "timestamp": obj.values.facetStartTime,
+                            "success": obj.values.noOfInvocation,
+                            "faults": obj.values.faultCount
+                            });
+            }
+        }
+    } else {
+        var log = new Log();
+        log.error(resp.getMessage());
+    }
+    return result;
+};
+
 
 /*
 * Get message stats of a component
@@ -174,6 +305,81 @@ function getStats(connector, superTenantId, componentType, componentName, entryP
         } else {
             query = "entryPoint : " + entryPoint + " AND _" + componentIdentifier + " : \"" + componentName + "\" AND startTime : [" + timeRange.range[0] + " TO " + timeRange.range[1] + "} AND meta_tenantId : [" + tenantId + " TO " + tenantId + "]";
         }
+        var searchParam = {
+            tableName: table + timeRange.unit,
+            query: query,
+            aggregateLevel: 0,
+            parentPath: [],
+            noOfRecords: 1000
+        }
+        if (table != "org_wso2_esb_analytics_stream_MediatorStatPer" && componentType == "ALL" && (timeRange.unit == "SECOND" || timeRange.unit == "MINUTE")) {
+            searchParam["tableName"] = searchParam["tableName"] + "ALL"
+        }
+        searchParam.aggregateFields = aggregateFields;
+        searchParams.push(searchParam);
+    }
+    resp = connector.searchMultiTablesWithAggregates(superTenantId, JSON.stringify(searchParams));
+    if (resp.status == "success") {
+        var totalInvocation = 0;
+        var totalFault = 0;
+        var dataPoints = [];
+        try {
+            dataPoints = JSON.parse(resp.getMessage());
+        } catch (error) {
+            var log = new Log();
+            log.error(error);
+        }
+        for (var i = 0; i < dataPoints.length; i++) {
+            var obj = dataPoints[i];
+            if (obj.length != 0) {
+                totalInvocation += obj[0].values.sum_no_of_invocation;
+                totalFault += obj[0].values.sum_fault_count;
+            }
+        }
+        result = {total: totalInvocation, failed: totalFault};
+    } else {
+        var log = new Log();
+        log.error(resp.getMessage());
+    }
+    return result;
+};
+
+/*
+* Get message stats of a proxy service operations
+*/
+function getProxyOperationStats(connector, superTenantId, componentType, componentName, proxyOperation, consumer, timeRanges, table, tenantId) {
+    var timeRange = Packages.org.wso2.analytics.esb.bean.TimeRange;
+    var result = {};
+    var searchParams = [];
+    var noOfInvocationSum = {
+        fields: ["noOfInvocation"],
+        aggregate: "SUM",
+        alias: "sum_no_of_invocation"
+    }
+    var faultCountSum = {
+        fields: ["faultCount"],
+        aggregate: "SUM",
+        alias: "sum_fault_count"
+    }
+    var aggregateFields = [];
+    aggregateFields.push(noOfInvocationSum);
+    aggregateFields.push(faultCountSum);
+    componentIdentifier = "componentName";
+
+    for (var i = 0; i < timeRanges.size(); i++) {
+      timeRange = timeRanges.get(i);       
+      if("SECOND" == timeRange.unit) {
+            continue;
+       }
+
+       query = "_" + componentIdentifier + " : \"" + componentName + "\" AND startTime : [" + timeRange.range[0] + " TO " + timeRange.range[1] + "} AND meta_tenantId : [" + tenantId + " TO " + tenantId + "]";
+       if (proxyOperation != null && proxyOperation != "undefined") {
+                 query = "operation " + ":\"" + proxyOperation + "\" AND " +  query ;
+            }
+
+       if (consumer != null && consumer != "undefined") {
+                 query = "consumer " + ":\"" + consumer + "\" AND " +  query ;
+            }
         var searchParam = {
             tableName: table + timeRange.unit,
             query: query,
